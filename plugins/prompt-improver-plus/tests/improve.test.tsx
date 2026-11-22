@@ -6,6 +6,39 @@ const HINT = {
   props: { hasSurvey: false },
 } as const
 
+// Replies the model got wrong: the box must never receive a stray <improved_prompt> tag.
+for (const [name, reply, expected] of [
+  ['no closing tag', '<improved_prompt>Prompt sem fechar', 'Prompt sem fechar'],
+  ['no closing tag, with model', '<improved_prompt>Prompt X\n<model>Haiku</model><reason>simples</reason>', 'Prompt X'],
+  ['no tags at all', 'Prompt solto', 'Prompt solto'],
+] as const) {
+  test(`never leaves tags in the box (${name})`, async ($, on) => {
+    const filled: string[] = []
+    let box = ''
+    on('ui.render', ($, e) => {
+      const { Text } = $.ui.resolve(e)
+      return <Text>engine hint</Text>
+    })
+    on('prompt.change', (_, e) => {
+      box = e.text
+      return { text: e.text, cursor: e.cursor }
+    })
+    on('prompt.read', () => ({ value: { text: box, cursor: 0 } }))
+    on('model.complete', () => ({ value: { isAnswered: true, text: reply } }))
+    on('prompt.fill', (_, e) => {
+      filled.push(e.text)
+      box = e.text
+      return { isFilled: true }
+    })
+
+    await $.prompt.change({ text: 'rascunho', cursor: 8, origin: { kind: 'typed' } } as never)
+    const ui = await $.ui.mount({ ...HINT, surface: 'desktop' })
+    await ui.press({ key: 'improve' })
+    expect(filled).toEqual([expected])
+    await ui.unmount()
+  })
+}
+
 for (const [surface, readsBox] of [
   ['terminal', true],
   ['desktop', true],

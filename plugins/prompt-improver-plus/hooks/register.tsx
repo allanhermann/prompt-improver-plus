@@ -56,8 +56,14 @@ function ask(draft: string) {
 type Improved = { text: string; model: string | null }
 
 function extract(reply: string): Improved | null {
-  const m = reply.match(/<improved_prompt>([\s\S]*?)<\/improved_prompt>/)
-  const text = (m?.[1] ?? reply.replace(/<(model|reason)>[\s\S]*?<\/>/g, '')).trim()
+  // The model sometimes drops the closing tag or answers without tags: take what follows the opening
+  // tag up to its closing tag, the <model> tag or the end, then strip any tag left over, so a
+  // "<improved_prompt>" never lands in the box.
+  const m = reply.match(/<improved_prompt>([\s\S]*?)(?:<\/improved_prompt>|<model>|<reason>|$)/)
+  const text = (m?.[1] ?? reply)
+    .replace(/<(model|reason)>[\s\S]*?<\/\1>/g, '')
+    .replace(/<\/?(improved_prompt|model|reason)>/g, '')
+    .trim()
   if (text.length === 0) return null
   const name = reply.match(/<model>\s*(haiku|sonnet|opus)\s*<\/model>/i)?.[1]
   const why = reply.match(/<reason>([\s\S]*?)<\/reason>/)?.[1]?.trim().replace(/\s+/g, ' ').slice(0, 60)

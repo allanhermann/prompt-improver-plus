@@ -1,6 +1,6 @@
 {
   "name": "prompt-improver-plus",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Botão ✨ Melhorar prompt junto da caixa de texto: lê o que você digitou e substitui pelo prompt melhorado (baseado em AndrewStrong615/prompt-improver, MIT)",
   "types": "./types/index.d.ts"
 }
