@@ -1,0 +1,13 @@
+{
+  "name": "local-mods",
+  "owner": { "name": "allan" },
+  "description": "Mods locais",
+  "plugins": [
+    {
+      "name": "prompt-improver-plus",
+      "source": "./plugins/prompt-improver-plus",
+      "description": "Botão ✨ ao lado da barra de uso que melhora o prompt digitado e o substitui na caixa de texto",
+      "version": "0.4.0"
+    }
+  ]
+}
